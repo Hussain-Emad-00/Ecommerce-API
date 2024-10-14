@@ -1,0 +1,17 @@
+export default () => ({
+  appPort: parseInt(process.env.PORT) || 3000,
+  passwordHashRounds: parseInt(process.env.PASSWORD_HASH_ROUNDS) || 10,
+  defaultPassword: process.env.DEFAULT_PASSWORD,
+  adminPassword: process.env.ADMIN_PASSWORD,
+  dbUrl: process.env.DATABASE_URL,
+  cookieSecretKey: process.env.COOKIE_SECRET_KEY,
+  accessTokenSecretKey: process.env.ACCESS_TOKEN_SECRET_KEY,
+  googleClientId: process.env.GOOGLE_CLIENT_ID,
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  gmailAppAccount: process.env.GMAIL_APP_ACCOUNT,
+  gmailAppPassword: process.env.GMAIL_APP_PASSWORD,
+  cloudinaryCloudName: process.env.CLOUDINARY_CLOUDNAME,
+  cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+  cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
+  frontendUrl: process.env.FRONT_END_URL,
+});

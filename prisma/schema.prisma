@@ -1,0 +1,108 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["omitApi", "postgresqlExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  Admin
+  Member
+}
+
+model User {
+  id          Int              @id @default(autoincrement())
+  email       String           @unique
+  firstname   String
+  lastname    String
+  password    String
+  picture     String           @default("")
+  role        Role             @default(value: Member)
+  verified    Boolean          @default(false)
+  resetToken  String?          @default("")
+  verifyToken String?          @default("")
+  cart        Cart?
+  wishlist    Wishlist?
+  reviews     ProductReviews[]
+  products    Product[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
+}
+
+model Product {
+  id                 Int                  @id @default(autoincrement())
+  title              String
+  description        String
+  price              String
+  image              String               @default("")
+  quantity           Int                  @default(1)
+  category           Category             @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  categoryId         Int
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId             Int
+  reviews            ProductReviews[]
+  productsOnWishlist ProductsOnWishlist[]
+  productsOnCart     ProductsOnCart[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+}
+
+model ProductReviews {
+  id        Int      @id @default(autoincrement())
+  comment   String?
+  like      Boolean?
+  dislike   Boolean?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  userId    Int?
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  productId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Wishlist {
+  id                 Int                  @id @default(autoincrement())
+  User               User                 @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId             Int                  @unique
+  productsOnWishlist ProductsOnWishlist[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+}
+
+model Cart {
+  id             Int              @id @default(autoincrement())
+  User           User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId         Int              @unique
+  productsOnCart ProductsOnCart[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model ProductsOnWishlist {
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  productId  Int
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  wishlistId Int
+  assignedAt DateTime @default(now())
+
+  @@id([wishlistId, productId])
+}
+
+model ProductsOnCart {
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  productId  Int
+  cart       Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  cartId     Int
+  assignedAt DateTime @default(now())
+
+  @@id([cartId, productId])
+}
