@@ -4,8 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { CreateCartDto } from './dto/create-cart.dto';
 import { PrismaService } from '../prisma.service';
+import { CreateCartProductDto } from './dto/create-cart-product.dto';
+import { DeleteCartProductDto } from './dto/delete-cart-product.dto';
 
 @Injectable()
 export class CartService {
@@ -22,7 +23,7 @@ export class CartService {
     }
   }
 
-  async add({ productId }: CreateCartDto, userId: number) {
+  async add({ productId }: CreateCartProductDto, userId: number) {
     try {
       await this.prisma.cart.update({
         where: { userId },
@@ -33,7 +34,7 @@ export class CartService {
     }
   }
 
-  async remove(productId: number, userId: number) {
+  async remove({productId}: DeleteCartProductDto, userId: number) {
     try {
       await this.prisma.cart.update({
         where: { userId },

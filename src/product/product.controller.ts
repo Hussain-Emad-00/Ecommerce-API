@@ -20,12 +20,12 @@ import {
   MemoryStorageFile,
   UploadedFile,
 } from '@blazity/nest-file-fastify';
-import { IsString } from 'class-validator';
 import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 
+import { ProductService } from './product.service';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { CreateProductDto } from './dto/create-product.dto';
-import { ProductService } from './product.service';
+import { PaginateProductsDto } from './dto/paginate-products.dto';
 
 @Controller('products')
 export class ProductController {
@@ -39,24 +39,16 @@ export class ProductController {
   }
 
   @Get('paginate')
-  @UseInterceptors(CacheInterceptor)
-  @CacheKey('products')
-  @ApiQuery({ name: 'page', required: false })
-  @ApiQuery({ name: 'limit', required: false })
-  async find(
-    @Query('page', ParseIntPipe) page?: number,
-    @Query('limit', ParseIntPipe) limit?: number,
-  ) {
-    return await this.productService.find(page, limit);
+  async find(@Query() query: PaginateProductsDto) {
+    return await this.productService.find(query.page, query.limit);
   }
 
-  @Get('view/:id')
+  @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return await this.productService.findOne({ id });
   }
 
-  @Get('/search')
-  @IsString()
+  @Get('search')
   @ApiQuery({ name: 'title', required: true })
   async search(@Query('title') title: string) {
     return this.productService.search(title);
@@ -73,7 +65,7 @@ export class ProductController {
   ) {
     return await this.productService.create(
       createProductDto,
-      +req['user'].id,
+      req['user'].id,
       file,
     );
   }

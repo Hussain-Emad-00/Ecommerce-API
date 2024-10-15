@@ -4,9 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { UpdateReviewDto } from './dto/update-review.dto';
 import { PrismaService } from '../prisma.service';
-import { CreateReviewDto } from './dto/create-review.dto';
+import { CreateProductReviewDto } from './dto/create-product-review.dto';
+import { UpdateProductReviewDto } from './dto/update-product-review.dto';
 
 @Injectable()
 export class ReviewService {
@@ -22,7 +22,7 @@ export class ReviewService {
     }
   }
 
-  async create(createReviewDto: CreateReviewDto, userId: number) {
+  async create(createReviewDto: CreateProductReviewDto, userId: number) {
     try {
       return await this.prisma.productReviews.create({
         data: { ...createReviewDto, userId },
@@ -32,12 +32,13 @@ export class ReviewService {
     }
   }
 
-  async update(id: number, updateReviewDto: UpdateReviewDto, userId: number) {
+  async update(id: number, updateReviewDto: UpdateProductReviewDto, userId: number) {
     try {
       if (updateReviewDto.like || updateReviewDto.dislike) {
         updateReviewDto.like = !updateReviewDto.dislike;
         updateReviewDto.dislike = !updateReviewDto.like;
       }
+      
       return await this.prisma.productReviews.update({
         where: { id, userId },
         data: { ...updateReviewDto, userId },

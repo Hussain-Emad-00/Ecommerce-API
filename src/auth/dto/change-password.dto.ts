@@ -6,13 +6,13 @@ export class ChangePasswordDto {
   @IsString()
   @MinLength(6)
   @MaxLength(50)
-  @Matches(/^(?=.*[0-9])/)
+  @Matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm)
   oldPassword: string;
 
   @ApiProperty()
   @IsString()
   @MinLength(6)
   @MaxLength(50)
-  @Matches(/^(?=.*[0-9])/)
+  @Matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm)
   newPassword: string;
 }

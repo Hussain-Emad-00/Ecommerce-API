@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { CacheModule } from '@nestjs/cache-manager';
 
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
@@ -12,11 +13,10 @@ import { ReviewModule } from './review/review.module';
 import { CategoryModule } from './category/category.module';
 import { RolesModule } from './roles/roles.module';
 import configuration from './config/configuration';
-import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot([{ ttl: 10000, limit: 15 }]),
+    ThrottlerModule.forRoot([{ ttl: 1000 * 60 * 10, limit: 50 }]), // ms * sec * min
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
@@ -32,7 +32,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     }),
     CacheModule.register({
       isGlobal: true,
-      ttl: 60 * 60 * 10,
+      ttl: 60 * 60 * 10, // sec * min * hr
       max: 100,
     }),
     UserModule,

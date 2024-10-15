@@ -12,11 +12,11 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FastifyRequest } from 'fastify';
+import { ApiNoContentResponse } from '@nestjs/swagger';
 
 import { ReviewService } from './review.service';
-import { UpdateReviewDto } from './dto/update-review.dto';
-import { CreateReviewDto } from './dto/create-review.dto';
-import { ApiNoContentResponse } from '@nestjs/swagger';
+import { UpdateProductReviewDto } from './dto/update-product-review.dto';
+import { CreateProductReviewDto } from './dto/create-product-review.dto';
 
 @Controller('reviews')
 export class ReviewController {
@@ -31,7 +31,7 @@ export class ReviewController {
   @UseGuards(AuthGuard('jwt'))
   async create(
     @Req() req: FastifyRequest,
-    @Body() createReviewDto: CreateReviewDto,
+    @Body() createReviewDto: CreateProductReviewDto,
   ) {
     return await this.reviewService.create(createReviewDto, req['user'].id);
   }
@@ -41,7 +41,7 @@ export class ReviewController {
   async update(
     @Req() req: FastifyRequest,
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateReviewDto: UpdateReviewDto,
+    @Body() updateReviewDto: UpdateProductReviewDto,
   ) {
     return await this.reviewService.update(id, updateReviewDto, req['user'].id);
   }

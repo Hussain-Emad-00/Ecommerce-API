@@ -18,7 +18,8 @@ import {
 import { FastifyRequest } from 'fastify';
 
 import { CartService } from './cart.service';
-import { CreateCartDto } from './dto/create-cart.dto';
+import { CreateCartProductDto } from './dto/create-cart-product.dto';
+import { DeleteCartProductDto } from './dto/delete-cart-product.dto';
 
 @Controller('cart')
 @UseGuards(AuthGuard('jwt'))
@@ -32,17 +33,16 @@ export class CartController {
 
   @Post()
   @ApiCreatedResponse()
-  async add(@Req() req: FastifyRequest, @Body() createCartDto: CreateCartDto) {
+  async add(@Req() req: FastifyRequest, @Body() createCartDto: CreateCartProductDto) {
     return await this.cartService.add(createCartDto, req['user'].id);
   }
 
   @Delete()
-  @ApiQuery({ name: 'productId' })
   @ApiNoContentResponse()
   async remove(
     @Req() req: FastifyRequest,
-    @Query('productId', ParseIntPipe) productId: number,
+    @Body() deleteCartDto: DeleteCartProductDto,
   ) {
-    return await this.cartService.remove(productId, req['user'].id);
+    return await this.cartService.remove(deleteCartDto, req['user'].id);
   }
 }

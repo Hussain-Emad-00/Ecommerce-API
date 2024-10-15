@@ -5,6 +5,6 @@ export class ForgotPasswordDto {
   @ApiProperty()
   @IsEmail()
   @MaxLength(80)
-  @Matches(/^gmail.com$/, { message: 'Only Gmail accounts' })
+  @Matches(/^[\w.+\-]+@gmail\.com$/, { message: 'Only Gmail accounts' })
   email: string;
 }

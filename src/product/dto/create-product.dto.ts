@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength, IsNumber } from 'class-validator';
 
 export class CreateProductDto {
   @ApiProperty()
@@ -30,4 +30,9 @@ export class CreateProductDto {
   @IsNotEmpty()
   @MaxLength(20)
   category_name: string;
+
+  @ApiProperty({ required: false, default: 0 })
+  @IsNumber()
+  @MaxLength(10)
+  quantity?: number = 0;
 }

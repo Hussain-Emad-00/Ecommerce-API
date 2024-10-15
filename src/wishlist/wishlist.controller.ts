@@ -18,7 +18,8 @@ import {
 import { FastifyRequest } from 'fastify';
 
 import { WishlistService } from './wishlist.service';
-import { CreateWishlistDto } from './dto/create-wishlist.dto';
+import { CreateWishlistProductDto } from './dto/create-wishlist-product.dto';
+import { DeleteWishlistProductDto } from './dto/delete-wishlist-product.dto';
 
 @Controller('wishlist')
 @UseGuards(AuthGuard('jwt'))
@@ -34,18 +35,18 @@ export class WishlistController {
   @ApiCreatedResponse()
   async add(
     @Req() req: FastifyRequest,
-    @Body() createCartDto: CreateWishlistDto,
+    @Body() createCartDto: CreateWishlistProductDto,
   ) {
     return await this.wishlistService.add(createCartDto, req['user'].id);
   }
 
   @Delete()
-  @ApiQuery({ name: 'productId' })
+
   @ApiNoContentResponse()
   async remove(
     @Req() req: FastifyRequest,
-    @Query('productId', ParseIntPipe) productId: number,
+    @Body() deleteCartDto: DeleteWishlistProductDto,
   ) {
-    return await this.wishlistService.remove(productId, req['user'].id);
+    return await this.wishlistService.remove(deleteCartDto, req['user'].id);
   }
 }

@@ -6,7 +6,7 @@ import { ImageInterface } from '../interfaces/image.interface';
 @Injectable()
 export class ImageService {
   private allowedFormats: string[] = ['image/png', 'image/jpg', 'image/jpeg'];
-  private imageSize: number = 2000000;
+  private imagMaxSize: number = 1024 * 1024 * 0.5; // Byte * KiloByte * MegaByte
 
   constructor() {}
 
@@ -15,7 +15,7 @@ export class ImageService {
 
     if (
       !this.allowedFormats.includes(file.mimetype) ||
-      file.size > this.imageSize
+      file.size > this.imagMaxSize
     )
       throw new BadRequestException();
 

@@ -4,8 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { PrismaService } from '../prisma.service';
+import { CreateWishlistProductDto } from './dto/create-wishlist-product.dto';
+import { DeleteWishlistProductDto } from './dto/delete-wishlist-product.dto';
 
 @Injectable()
 export class WishlistService {
@@ -22,7 +23,7 @@ export class WishlistService {
     }
   }
 
-  async add({ productId }: CreateWishlistDto, userId: number) {
+  async add({ productId }: CreateWishlistProductDto, userId: number) {
     try {
       await this.prisma.wishlist.update({
         where: { userId },
@@ -33,7 +34,7 @@ export class WishlistService {
     }
   }
 
-  async remove(productId: number, userId: number) {
+  async remove({ productId }: DeleteWishlistProductDto, userId: number) {
     try {
       await this.prisma.wishlist.update({
         where: { userId },

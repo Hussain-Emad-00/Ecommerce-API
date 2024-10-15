@@ -30,11 +30,11 @@ import { RoleGuard } from '../guards/role.guard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Get()
   /***
    @Roles(Role.Admin)
    @UseGuards(AuthGuard('jwt'), RoleGuard)
    ***/
-  @Get()
   async findAll() {
     return await this.userService.findAll();
   }
@@ -82,12 +82,5 @@ export class UserController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     return await this.userService.remove({ id }, req['user']);
-  }
-
-  @Post('profile-picture')
-  @UseInterceptors(FileInterceptor('profile', {}))
-  @ApiConsumes('multipart/form-data')
-  async upload(@UploadedFile() file: MemoryStorageFile) {
-    console.log(file);
   }
 }

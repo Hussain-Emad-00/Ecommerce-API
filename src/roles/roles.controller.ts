@@ -2,7 +2,7 @@ import { Body, Controller, Patch, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 import { RolesService } from './roles.service';
-import { UpdateRoleDto } from './dto/update-role.dto';
+import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { FastifyRequest } from 'fastify';
 
 @UseGuards(AuthGuard('jwt'))
@@ -13,7 +13,7 @@ export class RolesController {
   @Patch()
   async update(
     @Req() req: FastifyRequest,
-    @Body() updateRoleDto: UpdateRoleDto,
+    @Body() updateRoleDto: UpdateUserRoleDto,
   ) {
     return await this.rolesService.update(req['user'], updateRoleDto);
   }

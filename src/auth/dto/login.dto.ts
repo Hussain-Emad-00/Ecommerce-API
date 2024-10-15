@@ -11,13 +11,13 @@ export class LoginDto {
   @ApiProperty()
   @IsEmail()
   @MaxLength(80)
-  @Matches(/^gmail.com$/, { message: 'Only Gmail accounts' })
+  @Matches(/^[\w.+\-]+@gmail\.com$/, { message: 'Only Gmail accounts' })
   email: string;
 
   @ApiProperty()
   @IsString()
   @MinLength(6)
   @MaxLength(50)
-  @Matches(/^(?=.*[0-9])/)
+  @Matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm)
   password: string;
 }

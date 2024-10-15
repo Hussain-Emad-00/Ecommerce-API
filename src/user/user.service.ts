@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { hashSync } from 'bcrypt';
@@ -15,8 +16,6 @@ import { MailService } from '../mail.service';
 
 @Injectable()
 export class UserService {
-  private regex = /^gmail.com$/;
-
   constructor(
     private prisma: PrismaService,
     private imageService: ImageService,
@@ -25,14 +24,10 @@ export class UserService {
   ) {}
 
   async findAll() {
-    try {
-      const users = await this.prisma.user.findMany();
-      users.filter((user) => (user.password = undefined));
+    const users = await this.prisma.user.findMany();
+    users.filter((user) => (user.password = undefined));
 
-      return users;
-    } catch (error) {
-      throw new NotFoundException();
-    }
+    return users;
   }
 
   async findOne(where: Prisma.UserWhereUniqueInput) {
@@ -49,9 +44,6 @@ export class UserService {
   }
 
   async create(data: Prisma.UserCreateInput, file: ImageInterface) {
-    if (!this.regex.test(data.email.split('@')[1]))
-      throw new BadRequestException('Only Gmail accounts');
-
     const user = await this.prisma.user.findUnique({
       where: { email: data.email },
     });
@@ -80,25 +72,23 @@ export class UserService {
     _user: any,
     file: ImageInterface,
   ) {
-    if (data.email && !this.regex.test(data.email?.toString().split('@')[1]))
-      throw new BadRequestException('Only Gmail account');
-
     if (where.id == _user.id || _user.role == 'Admin') {
       const user = await this.prisma.user.findUnique({ where });
       if (!user) throw new NotFoundException();
 
       if (data.email) data.email = data.email.toString().trim().toLowerCase();
-
-      data.picture = await this.upload(file, 'profile');
-      if (data.picture && user.picture.includes('cloudinary'))
-        await this.imageService.remove(user.picture);
+      if (data.picture) {
+        data.picture = await this.upload(file, 'profile');
+        if (user.picture.includes('cloudinary'))
+          await this.imageService.remove(user.picture);
+      }
 
       const { password, ...updatedUser } = await this.prisma.user.update({
         where,
         data,
       });
       return updatedUser;
-    } else throw new BadRequestException();
+    } else throw new UnauthorizedException();
   }
 
   async remove(where: Prisma.UserWhereUniqueInput, user: any) {

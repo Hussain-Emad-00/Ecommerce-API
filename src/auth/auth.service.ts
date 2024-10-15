@@ -22,8 +22,6 @@ import { ImageInterface } from '../interfaces/image.interface';
 
 @Injectable()
 export class AuthService {
-  private regex = /^gmail.com$/;
-
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
@@ -55,15 +53,15 @@ export class AuthService {
         ),
       };
       const newUser = await this.prisma.user.create({ data });
-      const token = await this.generateToken(
+     
+      return { token: await this.generateToken(
         newUser.id.toString(),
         newUser.role,
-      );
-      return { token, role: newUser.role };
+        newUser.verified
+      ), role: newUser.role };
     }
 
-    const token = await this.generateToken(user.id.toString(), user.role);
-    return { token, role: user.role };
+    return { token: await this.generateToken(user.id.toString(), user.role, user.verified), role: user.role };
   }
 
   async validateUser(loginDto: LoginDto) {
@@ -72,8 +70,7 @@ export class AuthService {
     });
 
     if (user && this.comparePassword(loginDto.password, password)) return user;
-
-    throw new UnauthorizedException();
+    return;
   }
 
   async verify(token: string) {
@@ -83,15 +80,14 @@ export class AuthService {
     const user = await this.prisma.user.findFirst({
       where: { verifyToken: token },
     });
+    if (user) {
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { verified: true, verifyToken: '' },
+      });
 
-    if (!user) return;
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { verified: true, verifyToken: '' },
-    });
-
-    const jwt = await this.generateToken(user.id.toString(), user.role);
-    return { token: jwt, role: user.role };
+      return { token: await this.generateToken(user.id.toString(), user.role, true), role: user.role };
+    } else throw new NotFoundException();
   }
 
   async newVerifyToken(email: string) {
@@ -111,11 +107,9 @@ export class AuthService {
     { newPassword, oldPassword }: ChangePasswordDto,
   ) {
     const user = await this.prisma.user.findUnique({ where: { id } });
-    if (!user) throw new NotFoundException();
-
     const isPasswordMatch = this.comparePassword(oldPassword, user.password);
 
-    if (isPasswordMatch) {
+    if (user && isPasswordMatch) {
       newPassword = this.hashPassword(newPassword);
 
       await this.prisma.user.update({
@@ -124,7 +118,7 @@ export class AuthService {
       });
 
       return {
-        token: await this.generateToken(user.id.toString(), user.role),
+        token: await this.generateToken(user.id.toString(), user.role, user.verified),
         role: user.role,
       };
     }
@@ -170,14 +164,11 @@ export class AuthService {
       .send({ token: data.token, role: data.role });
   }
 
-  async generateToken(id: string, role: string) {
-    return await this.jwtService.signAsync({ id, role });
+  async generateToken(id: string, role: string, verified: boolean) {
+    return await this.jwtService.signAsync({ id, role, verified });
   }
 
   private async verifyTokenTime(email: string) {
-    if (!this.regex.test(email.split('@')[1]))
-      throw new BadRequestException('Only Gmail accounts');
-
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) throw new NotFoundException();
 

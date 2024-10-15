@@ -33,8 +33,8 @@ export class AuthController {
   @UseGuards(AuthGuard('local'))
   @ApiBody({ type: LoginDto })
   async login(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
-    const { id, role } = req['user'];
-    const token = await this.authService.generateToken(id, role);
+    const { id, role, verified } = req['user'];
+    const token = await this.authService.generateToken(id, role, verified);
     return this.authService.setToken(res, { token, role });
   }
 

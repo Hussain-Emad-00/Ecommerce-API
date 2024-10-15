@@ -32,28 +32,12 @@ export class ProductService {
     }
   }
 
-  async find(page: number, limit: number) {
-    try {
-      if (page <= 0 || typeof page !== 'number') page = 1;
-      if (limit <= 0 || typeof limit !== 'number') limit = 10;
-
-      const query = paginate(
-        { page, limit },
-        { orderBy: { createdAt: 'desc' } },
-      );
-
-      return await this.prisma.product.findMany(query);
-    } catch (error) {
-      throw new NotFoundException();
-    }
-  }
-
   async findOne(where: Prisma.ProductWhereUniqueInput) {
     try {
       return await this.prisma.product.findUnique({
         where,
         include: {
-          user: { select: { firstname: true, lastname: true } },
+          user: { select: { firstname: true, lastname: true, id: true } },
           reviews: {
             include: {
               user: { select: { firstname: true, lastname: true, id: true } },
@@ -62,6 +46,22 @@ export class ProductService {
           category: { select: { name: true } },
         },
       });
+    } catch (error) {
+      throw new NotFoundException();
+    }
+  }
+
+  async paginate(page: number, limit: number) {
+    try {
+      if (page <= 0) page = 1;
+      if (limit < 10) limit = 10;
+
+      const query = paginate(
+        { page, limit },
+        { orderBy: { createdAt: 'desc' } },
+      );
+
+      return await this.prisma.product.findMany(query);
     } catch (error) {
       throw new NotFoundException();
     }
@@ -80,7 +80,7 @@ export class ProductService {
   }
 
   async create(
-    { category_name, ...data }: CreateProductDto,
+    { category_name, ...createProductDto }: CreateProductDto,
     userId: number,
     file: ImageInterface,
   ) {
@@ -90,12 +90,12 @@ export class ProductService {
     if (!category) throw new NotFoundException();
 
     try {
-      data.image = await this.upload(file, 'product');
-
       await this.cacheManager.del('products');
+      createProductDto.image = await this.upload(file, 'product');
+      if (createProductDto.quantity <= 0) createProductDto.quantity = 0
 
       return this.prisma.product.create({
-        data: { ...data, categoryId: category.id, userId },
+        data: { ...createProductDto, categoryId: category.id, userId },
       });
     } catch (error) {
       throw new BadRequestException();
@@ -104,31 +104,35 @@ export class ProductService {
 
   async update(
     id: number,
-    { category_name, ...data }: UpdateProductDto,
+    {category_name, ...updateProductDto}: UpdateProductDto,
     userId: number,
     file: ImageInterface,
   ) {
     const product = await this.prisma.product.findUnique({ where: { id } });
 
-    data.image = await this.upload(file, 'product');
-    if (data.image && product.image.includes('cloudinary'))
-      await this.imageService.remove(product.image);
+    if (updateProductDto.image) {
+      updateProductDto.image = await this.upload(file, 'product');
+      if (product.image.includes('cloudinary'))
+        await this.imageService.remove(product.image);
+    }
 
-    await this.cacheManager.del('products');
+    if (updateProductDto.quantity <= 0) updateProductDto.quantity = 0
+
     try {
+      await this.cacheManager.del('products');
       if (category_name) {
         const category = await this.prisma.category.findFirst({
           where: { name: category_name },
         });
         return this.prisma.product.update({
           where: { id, userId },
-          data: { ...data, categoryId: category.id },
+          data: { ...updateProductDto, categoryId: category.id },
         });
       }
 
       return await this.prisma.product.update({
         where: { id, userId },
-        data,
+        data: updateProductDto,
       });
     } catch (error) {
       throw new NotFoundException();

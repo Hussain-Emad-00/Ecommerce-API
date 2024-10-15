@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsNumber, IsString, MaxLength } from 'class-validator';
 
-export class CreateReviewDto {
+export class CreateProductReviewDto {
   @ApiProperty({ required: false, default: '' })
   @IsString()
   @MaxLength(200)

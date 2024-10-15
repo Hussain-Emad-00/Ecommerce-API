@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
-import { UpdateRoleDto } from './dto/update-role.dto';
+import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { PrismaService } from '../prisma.service';
 import { Role } from '../decorators/roles.decorator';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class RolesService {
@@ -12,7 +12,7 @@ export class RolesService {
     private configService: ConfigService,
   ) {}
 
-  async update(user: any, updateRoleDto: UpdateRoleDto) {
+  async update(user: any, updateRoleDto: UpdateUserRoleDto) {
     const adminPassword = this.configService.get<string>('adminPassword');
 
     try {
