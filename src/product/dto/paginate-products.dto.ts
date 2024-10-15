@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { MaxLength, IsNumber } from 'class-validator';
+import { IsNumber, MaxLength } from 'class-validator';
 
 export class PaginateProductsDto {
   @ApiProperty({ required: false, default: 1 })

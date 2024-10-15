@@ -40,7 +40,7 @@ export class ProductController {
 
   @Get('paginate')
   async find(@Query() query: PaginateProductsDto) {
-    return await this.productService.find(query.page, query.limit);
+    return await this.productService.paginate(query.page, query.limit);
   }
 
   @Get(':id')

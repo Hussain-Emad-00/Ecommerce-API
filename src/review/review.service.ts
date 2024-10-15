@@ -32,13 +32,17 @@ export class ReviewService {
     }
   }
 
-  async update(id: number, updateReviewDto: UpdateProductReviewDto, userId: number) {
+  async update(
+    id: number,
+    updateReviewDto: UpdateProductReviewDto,
+    userId: number,
+  ) {
     try {
       if (updateReviewDto.like || updateReviewDto.dislike) {
         updateReviewDto.like = !updateReviewDto.dislike;
         updateReviewDto.dislike = !updateReviewDto.like;
       }
-      
+
       return await this.prisma.productReviews.update({
         where: { id, userId },
         data: { ...updateReviewDto, userId },

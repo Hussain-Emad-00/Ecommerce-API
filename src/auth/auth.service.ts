@@ -53,15 +53,25 @@ export class AuthService {
         ),
       };
       const newUser = await this.prisma.user.create({ data });
-     
-      return { token: await this.generateToken(
-        newUser.id.toString(),
-        newUser.role,
-        newUser.verified
-      ), role: newUser.role };
+
+      return {
+        token: await this.generateToken(
+          newUser.id.toString(),
+          newUser.role,
+          newUser.verified,
+        ),
+        role: newUser.role,
+      };
     }
 
-    return { token: await this.generateToken(user.id.toString(), user.role, user.verified), role: user.role };
+    return {
+      token: await this.generateToken(
+        user.id.toString(),
+        user.role,
+        user.verified,
+      ),
+      role: user.role,
+    };
   }
 
   async validateUser(loginDto: LoginDto) {
@@ -86,7 +96,10 @@ export class AuthService {
         data: { verified: true, verifyToken: '' },
       });
 
-      return { token: await this.generateToken(user.id.toString(), user.role, true), role: user.role };
+      return {
+        token: await this.generateToken(user.id.toString(), user.role, true),
+        role: user.role,
+      };
     } else throw new NotFoundException();
   }
 
@@ -118,7 +131,11 @@ export class AuthService {
       });
 
       return {
-        token: await this.generateToken(user.id.toString(), user.role, user.verified),
+        token: await this.generateToken(
+          user.id.toString(),
+          user.role,
+          user.verified,
+        ),
         role: user.role,
       };
     }

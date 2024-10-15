@@ -3,18 +3,12 @@ import {
   Controller,
   Delete,
   Get,
-  ParseIntPipe,
   Post,
-  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import {
-  ApiCreatedResponse,
-  ApiNoContentResponse,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiNoContentResponse } from '@nestjs/swagger';
 import { FastifyRequest } from 'fastify';
 
 import { CartService } from './cart.service';
@@ -33,7 +27,10 @@ export class CartController {
 
   @Post()
   @ApiCreatedResponse()
-  async add(@Req() req: FastifyRequest, @Body() createCartDto: CreateCartProductDto) {
+  async add(
+    @Req() req: FastifyRequest,
+    @Body() createCartDto: CreateCartProductDto,
+  ) {
     return await this.cartService.add(createCartDto, req['user'].id);
   }
 

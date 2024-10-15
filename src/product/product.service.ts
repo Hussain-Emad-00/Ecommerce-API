@@ -92,7 +92,7 @@ export class ProductService {
     try {
       await this.cacheManager.del('products');
       createProductDto.image = await this.upload(file, 'product');
-      if (createProductDto.quantity <= 0) createProductDto.quantity = 0
+      if (createProductDto.quantity <= 0) createProductDto.quantity = 0;
 
       return this.prisma.product.create({
         data: { ...createProductDto, categoryId: category.id, userId },
@@ -104,7 +104,7 @@ export class ProductService {
 
   async update(
     id: number,
-    {category_name, ...updateProductDto}: UpdateProductDto,
+    { category_name, ...updateProductDto }: UpdateProductDto,
     userId: number,
     file: ImageInterface,
   ) {
@@ -116,7 +116,7 @@ export class ProductService {
         await this.imageService.remove(product.image);
     }
 
-    if (updateProductDto.quantity <= 0) updateProductDto.quantity = 0
+    if (updateProductDto.quantity <= 0) updateProductDto.quantity = 0;
 
     try {
       await this.cacheManager.del('products');

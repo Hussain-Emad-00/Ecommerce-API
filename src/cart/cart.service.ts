@@ -34,7 +34,7 @@ export class CartService {
     }
   }
 
-  async remove({productId}: DeleteCartProductDto, userId: number) {
+  async remove({ productId }: DeleteCartProductDto, userId: number) {
     try {
       await this.prisma.cart.update({
         where: { userId },
