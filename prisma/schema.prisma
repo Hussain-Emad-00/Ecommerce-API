@@ -1,11 +1,11 @@
-generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["omitApi", "postgresqlExtensions"]
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 enum Role {
@@ -31,12 +31,6 @@ model User {
   products    Product[]
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
-}
-
-model Category {
-  id       Int       @id @default(autoincrement())
-  name     String    @unique
-  products Product[]
 }
 
 model Product {
@@ -72,13 +66,10 @@ model ProductReview {
   updatedAt DateTime @updatedAt
 }
 
-model Wishlist {
-  id                 Int                  @id @default(autoincrement())
-  User               User                 @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId             Int                  @unique
-  productsOnWishlist ProductsOnWishlist[]
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
 }
 
 model Cart {
@@ -90,16 +81,6 @@ model Cart {
   updatedAt      DateTime         @updatedAt
 }
 
-model ProductsOnWishlist {
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  productId  Int
-  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  wishlistId Int
-  assignedAt DateTime @default(now())
-
-  @@id([wishlistId, productId])
-}
-
 model ProductsOnCart {
   product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   productId  Int
@@ -108,4 +89,23 @@ model ProductsOnCart {
   assignedAt DateTime @default(now())
 
   @@id([cartId, productId])
+}
+
+model Wishlist {
+  id                 Int                  @id @default(autoincrement())
+  User               User                 @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId             Int                  @unique
+  productsOnWishlist ProductsOnWishlist[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+}
+
+model ProductsOnWishlist {
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  productId  Int
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  wishlistId Int
+  assignedAt DateTime @default(now())
+
+  @@id([wishlistId, productId])
 }
