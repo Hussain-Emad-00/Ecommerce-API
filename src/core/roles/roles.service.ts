@@ -2,8 +2,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
-import { PrismaService } from '../prisma.service';
-import { Role } from '../decorators/roles.decorator';
+import { PrismaService } from '../../prisma.service';
+import { Role } from '../../common/decorators/roles.decorator';
 
 @Injectable()
 export class RolesService {

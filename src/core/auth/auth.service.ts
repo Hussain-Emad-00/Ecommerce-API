@@ -11,14 +11,14 @@ import { JwtService } from '@nestjs/jwt';
 import { FastifyReply } from 'fastify';
 import { ConfigService } from '@nestjs/config';
 
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from '../../prisma.service';
 import { LoginDto } from './dto/login.dto';
-import { GoogleData } from '../interfaces/google-data.interface';
+import { GoogleData } from '../../common/interfaces/google-data.interface';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import { MailService } from '../mail.service';
+import { MailService } from '../../mail.service';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UserService } from '../user/user.service';
-import { ImageInterface } from '../interfaces/image.interface';
+import { ImageInterface } from '../../common/interfaces/image.interface';
 
 @Injectable()
 export class AuthService {

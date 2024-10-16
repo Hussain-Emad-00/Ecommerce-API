@@ -23,8 +23,8 @@ import { ApiConsumes, ApiNoContentResponse } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Role, Roles } from '../decorators/roles.decorator';
-import { RoleGuard } from '../guards/role.guard';
+import { Role, Roles } from '../../common/decorators/roles.decorator';
+import { RoleGuard } from '../../common/guards/role.guard';
 
 @Controller('users')
 export class UserController {

@@ -14,7 +14,7 @@ export class ReviewService {
 
   async findAll(productId: number) {
     try {
-      return await this.prisma.productReviews.findMany({
+      return await this.prisma.productReview.findMany({
         where: { productId },
       });
     } catch (error) {
@@ -24,7 +24,7 @@ export class ReviewService {
 
   async create(createReviewDto: CreateProductReviewDto, userId: number) {
     try {
-      return await this.prisma.productReviews.create({
+      return await this.prisma.productReview.create({
         data: { ...createReviewDto, userId },
       });
     } catch (error) {
@@ -43,7 +43,7 @@ export class ReviewService {
         updateReviewDto.dislike = !updateReviewDto.like;
       }
 
-      return await this.prisma.productReviews.update({
+      return await this.prisma.productReview.update({
         where: { id, userId },
         data: { ...updateReviewDto, userId },
       });
@@ -54,7 +54,7 @@ export class ReviewService {
 
   async remove(id: number, userId: number) {
     try {
-      await this.prisma.productReviews.delete({ where: { id, userId } });
+      await this.prisma.productReview.delete({ where: { id, userId } });
     } catch (error) {
       throw new NotFoundException();
     }

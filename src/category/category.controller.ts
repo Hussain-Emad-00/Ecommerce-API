@@ -15,8 +15,8 @@ import { ApiNoContentResponse } from '@nestjs/swagger';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { Role, Roles } from '../decorators/roles.decorator';
-import { RoleGuard } from '../guards/role.guard';
+import { Role, Roles } from '../common/decorators/roles.decorator';
+import { RoleGuard } from '../common/guards/role.guard';
 
 @Controller('categories')
 export class CategoryController {

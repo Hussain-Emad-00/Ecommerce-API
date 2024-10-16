@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { v2 } from 'cloudinary';
 
-import { ImageInterface } from '../interfaces/image.interface';
+import { ImageInterface } from '../common/interfaces/image.interface';
 
 @Injectable()
 export class ImageService {

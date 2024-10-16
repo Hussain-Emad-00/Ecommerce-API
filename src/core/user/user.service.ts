@@ -8,10 +8,10 @@ import { Prisma } from '@prisma/client';
 import { hashSync } from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 
-import { PrismaService } from '../prisma.service';
-import { ImageService } from '../images/image.service';
-import { ImageInterface } from '../interfaces/image.interface';
-import { MailService } from '../mail.service';
+import { PrismaService } from '../../prisma.service';
+import { ImageService } from '../../images/image.service';
+import { ImageInterface } from '../../common/interfaces/image.interface';
+import { MailService } from '../../mail.service';
 
 @Injectable()
 export class UserService {

@@ -12,9 +12,9 @@ import { Cache } from 'cache-manager';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from '../prisma.service';
-import { ImageInterface } from '../interfaces/image.interface';
+import { ImageInterface } from '../common/interfaces/image.interface';
 import { ImageService } from '../images/image.service';
-import { Role } from '../decorators/roles.decorator';
+import { Role } from '../common/decorators/roles.decorator';
 
 @Injectable()
 export class ProductService {
@@ -34,8 +34,9 @@ export class ProductService {
 
   async findOne(where: Prisma.ProductWhereUniqueInput) {
     try {
-      return await this.prisma.product.findUnique({
+      return await this.prisma.product.update({
         where,
+        data: { views: { increment: 1 } },
         include: {
           user: { select: { firstname: true, lastname: true, id: true } },
           reviews: {

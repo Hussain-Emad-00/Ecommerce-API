@@ -5,13 +5,14 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { CacheModule } from '@nestjs/cache-manager';
 
-import { UserModule } from './user/user.module';
-import { AuthModule } from './auth/auth.module';
+import { UserModule } from './core/user/user.module';
+import { AuthModule } from './core/auth/auth.module';
 import { ProductModule } from './product/product.module';
 import { CartModule } from './cart/cart.module';
 import { ReviewModule } from './review/review.module';
 import { CategoryModule } from './category/category.module';
-import { RolesModule } from './roles/roles.module';
+import { RolesModule } from './core/roles/roles.module';
+import { PaymentModule } from './payment/payment.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -42,6 +43,7 @@ import configuration from './config/configuration';
     ReviewModule,
     CategoryModule,
     RolesModule,
+    PaymentModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

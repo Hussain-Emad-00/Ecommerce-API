@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString, MaxLength, IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, MaxLength } from 'class-validator';
 
-import { Role } from '../../decorators/roles.decorator';
+import { Role } from '../../../common/decorators/roles.decorator';
 
 export class UpdateUserRoleDto {
   @ApiProperty()
