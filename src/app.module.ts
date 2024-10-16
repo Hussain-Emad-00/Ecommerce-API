@@ -26,7 +26,7 @@ import configuration from './config/configuration';
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('accessTokenSecretKey'),
-        signOptions: { expiresIn: '10d' },
+        signOptions: { expiresIn: '30m' },
       }),
       global: true,
       inject: [ConfigService],

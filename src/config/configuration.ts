@@ -6,6 +6,7 @@ export default () => ({
   dbUrl: process.env.DATABASE_URL,
   cookieSecretKey: process.env.COOKIE_SECRET_KEY,
   accessTokenSecretKey: process.env.ACCESS_TOKEN_SECRET_KEY,
+  refreshTokenSecretKey: process.env.REFRESH_TOKEN_SECRET_KEY,
   googleClientId: process.env.GOOGLE_CLIENT_ID,
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
   gmailAppAccount: process.env.GMAIL_APP_ACCOUNT,

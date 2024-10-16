@@ -55,7 +55,7 @@ export class AuthService {
       const newUser = await this.prisma.user.create({ data });
 
       return {
-        token: await this.generateToken(
+        token: await this.generateAccessToken(
           newUser.id.toString(),
           newUser.role,
           newUser.verified,
@@ -65,7 +65,7 @@ export class AuthService {
     }
 
     return {
-      token: await this.generateToken(
+      token: await this.generateAccessToken(
         user.id.toString(),
         user.role,
         user.verified,
@@ -102,7 +102,7 @@ export class AuthService {
       });
 
       return {
-        token: await this.generateToken(user.id.toString(), user.role, true),
+        token: await this.generateAccessToken(user.id.toString(), user.role, true),
         role: user.role,
       };
     } else throw new NotFoundException();
@@ -136,7 +136,7 @@ export class AuthService {
       });
 
       return {
-        token: await this.generateToken(
+        token: await this.generateAccessToken(
           user.id.toString(),
           user.role,
           user.verified,
@@ -186,7 +186,7 @@ export class AuthService {
       .send({ token: data.token, role: data.role });
   }
 
-  async generateToken(id: string, role: string, verified: boolean) {
+  async generateAccessToken(id: string, role: string, verified: boolean) {
     return await this.jwtService.signAsync({ id, role, verified });
   }
 

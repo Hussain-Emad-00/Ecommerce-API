@@ -33,6 +33,14 @@ model User {
   updatedAt   DateTime        @updatedAt
 }
 
+model RefreshToken {
+  id          Int       @id @default(autoincrement())
+  expiresIn   String
+  token   String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId      Int
+}
+
 model Product {
   id                 Int                  @id @default(autoincrement())
   title              String
