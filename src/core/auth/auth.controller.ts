@@ -24,13 +24,14 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { LocalAuthGuard } from '../../common/guards/local-auth.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  @UseGuards(AuthGuard('local'))
+  @UseGuards(LocalAuthGuard)
   @ApiBody({ type: LoginDto })
   async login(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
     const { id, role, verified } = req['user'];

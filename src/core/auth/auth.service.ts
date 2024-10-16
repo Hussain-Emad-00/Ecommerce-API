@@ -84,7 +84,7 @@ export class AuthService {
         return user;
       return;
     } catch (error) {
-      throw new UnauthorizedException();
+      throw new NotFoundException();
     }
   }
 
