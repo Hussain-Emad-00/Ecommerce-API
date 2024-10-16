@@ -19,6 +19,5 @@ export class CreateProductReviewDto {
 
   @ApiProperty()
   @IsNumber()
-  @MaxLength(10)
   productId: number;
 }

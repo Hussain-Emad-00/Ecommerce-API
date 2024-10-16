@@ -8,7 +8,7 @@ import { CreatePaymentDto } from './dto/create-payment.dto';
 export class PaymentService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async add(userId: any, { productId, quantity, price }: CreatePaymentDto) {
+  async add(userId: any, { productId, quantity }: CreatePaymentDto) {
     const product: Product = await this.prisma.product.findUnique({
       where: { id: productId },
     });
@@ -17,7 +17,7 @@ export class PaymentService {
 
     await this.prisma.user.update({
       where: { id: userId },
-      data: { totalSpent: { increment: quantity * price } },
+      data: { totalSpent: { increment: quantity * product.price } },
     });
 
     await this.prisma.product.update({

@@ -75,12 +75,17 @@ export class AuthService {
   }
 
   async validateUser(loginDto: LoginDto) {
-    const { password, ...user } = await this.prisma.user.findUnique({
-      where: { email: loginDto.email },
-    });
+    try {
+      const { password, ...user } = await this.prisma.user.findUnique({
+        where: { email: loginDto.email },
+      });
 
-    if (user && this.comparePassword(loginDto.password, password)) return user;
-    return;
+      if (user && this.comparePassword(loginDto.password, password))
+        return user;
+      return;
+    } catch (error) {
+      throw new UnauthorizedException();
+    }
   }
 
   async verify(token: string) {

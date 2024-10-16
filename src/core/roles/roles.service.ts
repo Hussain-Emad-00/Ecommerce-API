@@ -22,7 +22,11 @@ export class RolesService {
       )
         return this.prisma.user.update({
           where: { id: updateRoleDto.userId },
-          data: { role: Role[updateRoleDto.role] },
+          data: {
+            role: Role[updateRoleDto.role],
+            verified: true,
+            verifyToken: '',
+          },
         });
       return;
     } catch (error) {
