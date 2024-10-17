@@ -14,31 +14,24 @@ enum Role {
 }
 
 model User {
-  id          Int             @id @default(autoincrement())
-  email       String          @unique
-  firstname   String
-  lastname    String
-  password    String
-  picture     String          @default("")
-  role        Role            @default(value: Member)
-  verified    Boolean         @default(false)
-  totalSpent  Int             @default(0)
-  resetToken  String?         @default("")
-  verifyToken String?         @default("")
-  cart        Cart?
-  wishlist    Wishlist?
-  reviews     ProductReview[]
-  products    Product[]
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-}
-
-model RefreshToken {
-  id          Int       @id @default(autoincrement())
-  expiresIn   String
-  token   String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId      Int
+  id           Int             @id @default(autoincrement())
+  email        String          @unique
+  firstname    String
+  lastname     String
+  password     String
+  picture      String          @default("")
+  role         Role            @default(value: Member)
+  verified     Boolean         @default(false)
+  totalSpent   Int             @default(0)
+  resetToken   String?         @default("")
+  verifyToken  String?         @default("")
+  refreshToken String?         @default("")
+  cart         Cart?
+  wishlist     Wishlist?
+  reviews      ProductReview[]
+  products     Product[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 }
 
 model Product {
@@ -53,7 +46,7 @@ model Product {
   category           Category             @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   categoryId         Int
   user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId             Int
+  userId Int @unique
   reviews            ProductReview[]
   productsOnWishlist ProductsOnWishlist[]
   productsOnCart     ProductsOnCart[]
@@ -67,7 +60,7 @@ model ProductReview {
   like      Boolean?
   dislike   Boolean?
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  userId    Int?
+  userId Int? @unique
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   productId Int
   createdAt DateTime @default(now())

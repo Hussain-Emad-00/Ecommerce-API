@@ -8,8 +8,8 @@ import {
 import { Prisma } from '@prisma/client';
 import { compareSync, hashSync } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { FastifyReply } from 'fastify';
 import { ConfigService } from '@nestjs/config';
+import { v4 as uuidV4 } from 'uuid';
 
 import { PrismaService } from '../../prisma.service';
 import { LoginDto } from './dto/login.dto';
@@ -55,8 +55,8 @@ export class AuthService {
       const newUser = await this.prisma.user.create({ data });
 
       return {
-        token: await this.generateAccessToken(
-          newUser.id.toString(),
+        token: await this.generateTokens(
+          newUser.id,
           newUser.role,
           newUser.verified,
         ),
@@ -65,11 +65,7 @@ export class AuthService {
     }
 
     return {
-      token: await this.generateAccessToken(
-        user.id.toString(),
-        user.role,
-        user.verified,
-      ),
+      ...(await this.generateTokens(user.id, user.role, user.verified)),
       role: user.role,
     };
   }
@@ -102,7 +98,7 @@ export class AuthService {
       });
 
       return {
-        token: await this.generateAccessToken(user.id.toString(), user.role, true),
+        ...(await this.generateTokens(user.id, user.role, true)),
         role: user.role,
       };
     } else throw new NotFoundException();
@@ -136,11 +132,7 @@ export class AuthService {
       });
 
       return {
-        token: await this.generateAccessToken(
-          user.id.toString(),
-          user.role,
-          user.verified,
-        ),
+        ...(await this.generateTokens(user.id, user.role, user.verified)),
         role: user.role,
       };
     }
@@ -169,25 +161,54 @@ export class AuthService {
     });
 
     password = this.hashPassword(password);
+
     await this.prisma.user.update({
       where: { id: user.id },
       data: { resetToken: '', password },
     });
   }
 
-  setToken(res: FastifyReply, data: { token: string; role: string }) {
-    res
-      .setCookie('access_token', data.token, {
-        httpOnly: true,
-        secure: true,
-        path: '/',
-        expires: new Date(Date.now() + 240 * 60 * 60 * 1000),
-      })
-      .send({ token: data.token, role: data.role });
+  async refresh(token: string) {
+    try {
+      const { id, role, verified, refreshToken } =
+        await this.prisma.user.findFirst({
+          where: { refreshToken: token },
+        });
+
+      const date = new Date(+refreshToken.split('@')[1]);
+
+      if (id && date >= new Date())
+        return {
+          access_token: await this.jwtService.signAsync({ id, role, verified }),
+        };
+      return;
+    } catch (error) {
+      throw new NotFoundException();
+    }
   }
 
-  async generateAccessToken(id: string, role: string, verified: boolean) {
-    return await this.jwtService.signAsync({ id, role, verified });
+  async generateTokens(id: number, role: string, verified: boolean) {
+    const date = new Date();
+    date.setDate(date.getDate() + 30);
+
+    const accessToken = await this.jwtService.signAsync({ id, role, verified });
+    const { refreshToken } = await this.prisma.user.update({
+      where: { id },
+      data: { refreshToken: `${uuidV4()}@${date.getTime()}` },
+    });
+
+    return { accessToken, refreshToken };
+  }
+
+  async logout(id: number) {
+    try {
+      return this.prisma.user.update({
+        where: { id },
+        data: { refreshToken: '' },
+      });
+    } catch (error) {
+      throw new NotFoundException();
+    }
   }
 
   private async verifyTokenTime(email: string) {

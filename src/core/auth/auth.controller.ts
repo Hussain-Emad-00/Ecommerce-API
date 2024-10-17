@@ -5,12 +5,11 @@ import {
   Patch,
   Post,
   Req,
-  Res,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { FastifyReply, FastifyRequest } from 'fastify';
+import { FastifyRequest } from 'fastify';
 import { ApiBody, ApiConsumes, ApiNoContentResponse } from '@nestjs/swagger';
 import {
   FileInterceptor,
@@ -25,6 +24,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { LocalAuthGuard } from '../../common/guards/local-auth.guard';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -33,10 +33,10 @@ export class AuthController {
   @Post('login')
   @UseGuards(LocalAuthGuard)
   @ApiBody({ type: LoginDto })
-  async login(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async login(@Req() req: FastifyRequest) {
     const { id, role, verified } = req['user'];
-    const token = await this.authService.generateToken(id, role, verified);
-    return this.authService.setToken(res, { token, role });
+
+    return await this.authService.generateTokens(id, role, verified);
   }
 
   @Post('register')
@@ -51,8 +51,8 @@ export class AuthController {
 
   @Post('verify')
   @ApiBody({ type: String, required: true })
-  async verify(@Body('token') token: string, @Res() res: FastifyReply) {
-    return this.authService.setToken(res, await this.authService.verify(token));
+  async verify(@Body('token') token: string) {
+    return await this.authService.verify(token);
   }
 
   @Post('new-verify-token')
@@ -61,34 +61,34 @@ export class AuthController {
     return this.authService.newVerifyToken(email);
   }
 
+  @Patch('refresh')
+  async refresh(@Body() RefreshTokenDto: RefreshTokenDto) {
+    return await this.authService.refresh(RefreshTokenDto.token);
+  }
+
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  async googleAuth(@Req() req: FastifyRequest) {}
+  async googleAuth() {}
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(
-    @Req() req: FastifyRequest,
-    @Res() res: FastifyReply,
-  ) {
+  async googleAuthRedirect(@Req() req: FastifyRequest) {
     const { token, role } = await this.authService.googleLoginOrCreate(
       req['user'],
     );
-    return this.authService.setToken(res, { token, role });
+    return { token, role };
   }
 
   @Patch('change-password')
   @UseGuards(AuthGuard('jwt'))
   async changePassword(
     @Req() req: FastifyRequest,
-    @Res() res: FastifyReply,
     @Body() changePasswordDto: ChangePasswordDto,
   ) {
-    const { token, role } = await this.authService.changePassword(
+    return await this.authService.changePassword(
       req['user'].id,
       changePasswordDto,
     );
-    return this.authService.setToken(res, { token, role });
   }
 
   @Post('forgot-password')
@@ -106,7 +106,7 @@ export class AuthController {
   @Get('logout')
   @UseGuards(AuthGuard('jwt'))
   @ApiNoContentResponse()
-  logout(@Res() res: FastifyReply) {
-    res.clearCookie('access_token').send();
+  async logout(@Req() req: FastifyRequest) {
+    await this.authService.logout(req['user'].id);
   }
 }

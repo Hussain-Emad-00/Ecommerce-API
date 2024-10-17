@@ -24,17 +24,21 @@ export class UserService {
 
   async findAll() {
     const users = await this.prisma.user.findMany();
-    users.filter((user) => (user.password = undefined));
+    users.filter((user) => {
+      user.password = undefined;
+      user.refreshToken = undefined;
+    });
 
     return users;
   }
 
   async findOne(where: Prisma.UserWhereUniqueInput) {
     try {
-      const { password, ...user } = await this.prisma.user.findUnique({
-        where,
-        include: { reviews: true, products: true },
-      });
+      const { password, refreshToken, ...user } =
+        await this.prisma.user.findUnique({
+          where,
+          include: { reviews: true, products: true },
+        });
 
       return user;
     } catch (error) {
@@ -54,14 +58,15 @@ export class UserService {
 
     const verifyToken = await this.mailService.sendVerifyLink(data.email);
 
-    const { password, ...newUser } = await this.prisma.user.create({
-      data: {
-        ...data,
-        cart: { create: {} },
-        wishlist: { create: {} },
-        verifyToken,
-      },
-    });
+    const { password, refreshToken, ...newUser } =
+      await this.prisma.user.create({
+        data: {
+          ...data,
+          cart: { create: {} },
+          wishlist: { create: {} },
+          verifyToken,
+        },
+      });
     return newUser;
   }
 
@@ -82,10 +87,11 @@ export class UserService {
           await this.imageService.remove(user.picture);
       }
 
-      const { password, ...updatedUser } = await this.prisma.user.update({
-        where,
-        data,
-      });
+      const { password, refreshToken, ...updatedUser } =
+        await this.prisma.user.update({
+          where,
+          data,
+        });
       return updatedUser;
     } else throw new UnauthorizedException();
   }
