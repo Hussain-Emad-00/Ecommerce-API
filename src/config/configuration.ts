@@ -1,5 +1,6 @@
 export default () => ({
   appPort: parseInt(process.env.PORT) || 3000,
+  environment: process.env.ENVIRONMENT,
   passwordHashRounds: parseInt(process.env.PASSWORD_HASH_ROUNDS) || 10,
   defaultPassword: process.env.DEFAULT_PASSWORD,
   adminPassword: process.env.ADMIN_PASSWORD,

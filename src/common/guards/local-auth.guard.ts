@@ -21,14 +21,11 @@ export class LocalAuthGuard extends AuthGuard('local') {
     );
 
     if (errorMessages.length > 0) {
-      response
-        .status(HttpStatus.BAD_REQUEST)
-        .send({
-          message: errorMessages[0],
-          error: 'Bad Request',
-          statusCode: 400,
-        })
-        .send();
+      response.status(HttpStatus.BAD_REQUEST).send({
+        message: errorMessages[0],
+        error: 'Bad Request',
+        statusCode: 400,
+      });
       return false;
     }
 

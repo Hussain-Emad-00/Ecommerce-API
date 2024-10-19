@@ -15,42 +15,50 @@ import { MailService } from '../../mail.service';
 
 @Injectable()
 export class UserService {
+  private readonly userSelectQuery: object;
+
   constructor(
     private prisma: PrismaService,
     private imageService: ImageService,
     private configService: ConfigService,
     private mailService: MailService,
-  ) {}
+  ) {
+    this.userSelectQuery = {
+      id: true,
+      email: true,
+      firstname: true,
+      lastname: true,
+      picture: true,
+      role: true,
+      verified: true,
+      totalSpent: true,
+      createdAt: true,
+      updatedAt: true,
+    };
+  }
 
   async findAll() {
-    const users = await this.prisma.user.findMany();
-    users.filter((user) => {
-      user.password = undefined;
-      user.refreshToken = undefined;
+    return this.prisma.user.findMany({
+      select: this.userSelectQuery,
     });
-
-    return users;
   }
 
   async findOne(where: Prisma.UserWhereUniqueInput) {
     try {
-      const { password, refreshToken, ...user } =
-        await this.prisma.user.findUnique({
-          where,
-          include: { reviews: true, products: true },
-        });
-
-      return user;
+      return await this.prisma.user.findUnique({
+        where,
+        select: { ...this.userSelectQuery, reviews: true, products: true },
+      });
     } catch (error) {
       throw new NotFoundException();
     }
   }
 
   async create(data: Prisma.UserCreateInput, file: ImageInterface) {
-    const user = await this.prisma.user.findUnique({
+    const existingUser = await this.prisma.user.findUnique({
       where: { email: data.email },
     });
-    if (user) throw new ConflictException();
+    if (existingUser) throw new ConflictException();
 
     data.password = this.hashPassword(data.password.toString().trim());
     data.email = data.email.toString().trim().toLowerCase();
@@ -58,16 +66,15 @@ export class UserService {
 
     const verifyToken = await this.mailService.sendVerifyLink(data.email);
 
-    const { password, refreshToken, ...newUser } =
-      await this.prisma.user.create({
-        data: {
-          ...data,
-          cart: { create: {} },
-          wishlist: { create: {} },
-          verifyToken,
-        },
-      });
-    return newUser;
+    return this.prisma.user.create({
+      data: {
+        ...data,
+        cart: { create: {} },
+        wishlist: { create: {} },
+        verifyToken,
+      },
+      select: this.userSelectQuery,
+    });
   }
 
   async update(
@@ -87,12 +94,11 @@ export class UserService {
           await this.imageService.remove(user.picture);
       }
 
-      const { password, refreshToken, ...updatedUser } =
-        await this.prisma.user.update({
-          where,
-          data,
-        });
-      return updatedUser;
+      return this.prisma.user.update({
+        where,
+        data,
+        select: this.userSelectQuery,
+      });
     } else throw new UnauthorizedException();
   }
 

@@ -3,7 +3,6 @@ import {
   Inject,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { compareSync, hashSync } from 'bcrypt';
@@ -35,7 +34,7 @@ export class AuthService {
   }
 
   async googleLoginOrCreate(googleUser: GoogleData) {
-    if (!googleUser) throw new UnauthorizedException();
+    if (!googleUser) throw new BadRequestException();
 
     const user = await this.prisma.user.findUnique({
       where: { email: googleUser.email },
@@ -65,7 +64,7 @@ export class AuthService {
     }
 
     return {
-      ...(await this.generateTokens(user.id, user.role, user.verified)),
+      token: await this.generateTokens(user.id, user.role, user.verified),
       role: user.role,
     };
   }
@@ -98,7 +97,7 @@ export class AuthService {
       });
 
       return {
-        ...(await this.generateTokens(user.id, user.role, true)),
+        token: await this.generateTokens(user.id, user.role, true),
         role: user.role,
       };
     } else throw new NotFoundException();
@@ -132,7 +131,7 @@ export class AuthService {
       });
 
       return {
-        ...(await this.generateTokens(user.id, user.role, user.verified)),
+        token: await this.generateTokens(user.id, user.role, user.verified),
         role: user.role,
       };
     }

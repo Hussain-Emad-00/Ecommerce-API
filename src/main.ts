@@ -7,8 +7,6 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from '@fastify/helmet';
 import compression from '@fastify/compress';
-import { join } from 'path';
-import fastifyCookie from '@fastify/cookie';
 import multipart from '@fastify/multipart';
 import { ConfigService } from '@nestjs/config';
 
@@ -18,22 +16,17 @@ async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
-    { cors: true },
   );
 
   const configService = app.get<ConfigService>(ConfigService);
 
-  await app.register(helmet);
-  await app.register(compression);
-  await app.register(fastifyCookie, {
-    secret: configService.get<string>('cookieSecret'),
-  });
-  await app.register(multipart);
+  const env = configService.get<string>('environment');
+  const frontendUrl = configService.get<string>('frontendUrl');
+  app.enableCors({ origin: env == 'dev' ? '*' : frontendUrl });
 
-  app.useStaticAssets({
-    root: join(__dirname, '..', 'public'),
-    prefix: '/public/',
-  });
+  await app.register(helmet, { contentSecurityPolicy: false });
+  await app.register(compression);
+  await app.register(multipart);
 
   app
     .getHttpAdapter()
@@ -69,8 +62,9 @@ async function bootstrap() {
   );
 
   const port = configService.get<string>('appPort');
-  await app.listen(port, '0.0.0.0');
-  console.log(`Server is running on port ${port}`);
+  await app.listen(port, '0.0.0.0', (err, address) => {
+    console.log(`Server is running on ${address}`);
+  });
 }
 
 bootstrap();
