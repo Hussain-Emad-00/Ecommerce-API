@@ -83,88 +83,73 @@ export class AuthService {
     }
   }
 
-  async verify(token: string) {
+  async verify(verifyToken: string) {
     const date = new Date(+token.split('@')[1]);
     if (!date || date < new Date()) throw new BadRequestException();
 
-    const user = await this.prisma.user.findFirst({
-      where: { verifyToken: token },
-    });
-    if (user) {
-      await this.prisma.user.update({
-        where: { id: user.id },
+    try {
+      await this.prisma.user.updateMany({
+        where: { verifyToken },
         data: { verified: true, verifyToken: '' },
       });
-
-      return {
-        token: await this.generateTokens(user.id, user.role, true),
-        role: user.role,
-      };
-    } else throw new NotFoundException();
+    } catch (error) {
+      throw new NotFoundException();
+    }
   }
 
   async newVerifyToken(email: string) {
-    if (!(await this.verifyTokenTime(email))) {
-      const verifyToken = await this.mailService.sendVerifyLink(email);
-
-      return this.prisma.user.update({
+    try {
+      await this.prisma.user.update({
         where: { email },
-        data: { verifyToken },
+        data: { verifyToken: await this.mailService.sendVerifyLink(email) },
       });
+    } catch (error) {
+      throw new NotFoundException();
     }
-    return;
   }
 
   async changePassword(
     id: number,
     { newPassword, oldPassword }: ChangePasswordDto,
   ) {
-    const user = await this.prisma.user.findUnique({ where: { id } });
-    const isPasswordMatch = this.comparePassword(oldPassword, user.password);
-
-    if (user && isPasswordMatch) {
-      newPassword = this.hashPassword(newPassword);
-
-      await this.prisma.user.update({
-        where: { id },
-        data: { password: newPassword },
-      });
-
-      return {
-        token: await this.generateTokens(user.id, user.role, user.verified),
-        role: user.role,
-      };
+    try {
+      const user = await this.prisma.user.findUnique({ where: { id } });
+      const isPasswordMatch = this.comparePassword(oldPassword, user.password);
+  
+      if (user && isPasswordMatch) {
+        await this.prisma.user.update({
+          where: { id },
+          data: { password: await this.hashPassword(newPassword) },
+        });
+      } else throw new BadRequestException();
+    } catch (error) {
+      throw new BadRequestException();
     }
-
-    throw new BadRequestException();
   }
 
   async forgotPassword(email: string) {
-    if (!(await this.verifyTokenTime(email))) {
-      const resetToken = await this.mailService.sendPasswordResetLink(email);
-
+    try {
       return this.prisma.user.update({
         where: { email },
-        data: { resetToken },
+        data: { resetToken: await this.mailService.sendPasswordResetLink(email) },
       });
+    } catch (error) {
+      throw new NotFoundException();
     }
-    return;
   }
 
   async resetPassword({ token, password }: ResetPasswordDto) {
     const date = new Date(+token.split('@')[1]);
-    if (!date || date < new Date()) throw new BadRequestException();
+    if (!date || date < new Date()) throw new BadRequestException(`The Token is invalid`);
 
-    const user = await this.prisma.user.findFirst({
-      where: { resetToken: token },
-    });
-
-    password = this.hashPassword(password);
-
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { resetToken: '', password },
-    });
+    try {
+      await this.prisma.user.updateMany({
+        where: { resetToken: token },
+        data: { resetToken: '', password: await this.hashPassword(password) },
+      });
+    } catch (error) {
+      throw new NotFoundException();
+    }
   }
 
   async refresh(token: string) {
@@ -176,13 +161,14 @@ export class AuthService {
 
       const date = new Date(+refreshToken.split('@')[1]);
 
-      if (id && date >= new Date())
-        return {
-          access_token: await this.jwtService.signAsync({ id, role, verified }),
-        };
-      return;
+      if (date < new Date())
+        throw new NotFoundException(`The refresh Token is invalid`);
+
+      return {
+        access_token: await this.jwtService.signAsync({ id, role, verified }),
+      };
     } catch (error) {
-      throw new NotFoundException();
+      throw new NotFoundException(`The refresh Token is invalid`);
     }
   }
 
@@ -200,14 +186,10 @@ export class AuthService {
   }
 
   async logout(id: number) {
-    try {
       return this.prisma.user.update({
         where: { id },
         data: { refreshToken: '' },
       });
-    } catch (error) {
-      throw new NotFoundException();
-    }
   }
 
   private async verifyTokenTime(email: string) {
