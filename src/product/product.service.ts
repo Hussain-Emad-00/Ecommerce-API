@@ -48,7 +48,7 @@ export class ProductService {
         },
       });
     } catch (error) {
-      throw new NotFoundException();
+      throw new NotFoundException(`This product does not exist`);
     }
   }
 
@@ -88,12 +88,12 @@ export class ProductService {
     const category = await this.prisma.category.findFirst({
       where: { name: category_name },
     });
-    if (!category) throw new NotFoundException();
+    if (!category) throw new NotFoundException(`This category "${category_name}" does not exist`);
 
     try {
       await this.cacheManager.del('products');
       createProductDto.image = await this.upload(file, 'product');
-      if (createProductDto.quantity <= 0) createProductDto.quantity = 0;
+      if (createProductDto.quantity < 0) createProductDto.quantity = 0;
 
       return this.prisma.product.create({
         data: { ...createProductDto, categoryId: category.id, userId },
@@ -117,7 +117,7 @@ export class ProductService {
         await this.imageService.remove(product.image);
     }
 
-    if (updateProductDto.quantity <= 0) updateProductDto.quantity = 0;
+    if (updateProductDto.quantity < 0) updateProductDto.quantity = 0;
 
     try {
       await this.cacheManager.del('products');
