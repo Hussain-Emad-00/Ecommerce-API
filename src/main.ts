@@ -19,10 +19,10 @@ async function bootstrap() {
   );
 
   const configService = app.get<ConfigService>(ConfigService);
-
-  const env = configService.get<string>('environment');
+  const env = configService.get<string>('NODE_ENV');
   const frontendUrl = configService.get<string>('frontendUrl');
-  app.enableCors({ origin: env == 'dev' ? '*' : frontendUrl });
+  
+  app.enableCors({ origin: env == 'development' ? '*' : frontendUrl });
 
   await app.register(helmet, { contentSecurityPolicy: false });
   await app.register(compression);
