@@ -15,15 +15,7 @@ import { MailService } from '../../mail.service';
 
 @Injectable()
 export class UserService {
-  private readonly userSelectQuery: object;
-
-  constructor(
-    private prisma: PrismaService,
-    private imageService: ImageService,
-    private configService: ConfigService,
-    private mailService: MailService,
-  ) {
-    this.userSelectQuery = {
+  private readonly userSelectQuery = {
       id: true,
       email: true,
       firstname: true,
@@ -35,7 +27,13 @@ export class UserService {
       createdAt: true,
       updatedAt: true,
     };
-  }
+
+  constructor(
+    private prisma: PrismaService,
+    private imageService: ImageService,
+    private configService: ConfigService,
+    private mailService: MailService,
+  ) {}
 
   async findAll() {
     return this.prisma.user.findMany({
