@@ -87,7 +87,13 @@ export class UserService {
       const user = await this.prisma.user.findUnique({ where });
       if (!user) throw new NotFoundException();
 
-      if (data.email) data.email = data.email.toString().trim().toLowerCase();
+      if (data.email) {
+        data.email = data.email.toString().trim().toLowerCase();
+        data.verifyToken = await this.mailService.sendVerifyLink(data.email);
+        data.verified = false;
+        await this.mailService.sendMessage(user.email, `your email changed to ${data.email}`);
+      }
+      
       if (data.picture) {
         data.picture = await this.upload(file, 'profile');
         if (user.picture.includes('cloudinary'))
