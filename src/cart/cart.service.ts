@@ -30,7 +30,7 @@ export class CartService {
         data: { productsOnCart: { create: { productId } } },
       });
     } catch (error) {
-      throw new BadRequestException();
+      throw new NotFoundException(`This product does not exist`);
     }
   }
 
@@ -41,7 +41,7 @@ export class CartService {
         data: { productsOnCart: { deleteMany: { productId } } },
       });
     } catch (error) {
-      throw new NotFoundException();
+      throw new NotFoundException(`This product does not exist`);
     }
   }
 }
