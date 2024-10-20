@@ -5,19 +5,19 @@ import { ImageInterface } from '../common/interfaces/image.interface';
 
 @Injectable()
 export class ImageService {
-  private allowedFormats: string[] = ['image/png', 'image/jpg', 'image/jpeg'];
-  private imagMaxSize: number = 1024 * 1024 * 0.5; // Byte * KiloByte * MegaByte
+  private allowedFormats = ['image/png', 'image/jpg', 'image/jpeg'];
+  private imagMaxSizer = 1024 * 1024 * 1; // Byte * KiloByte * MegaByte
 
   constructor() {}
 
   async create(file: ImageInterface, folder: string) {
-    if (!file.size) return undefined;
+    if (!file.size) return;
 
-    if (
-      !this.allowedFormats.includes(file.mimetype) ||
-      file.size > this.imagMaxSize
-    )
-      throw new BadRequestException();
+    if (!this.allowedFormats.includes(file.mimetype))
+      throw new BadRequestException(`The ${file.mimetype} is not allowed`);
+
+    if (file.size > this.imagMaxSize)
+      throw new BadRequestException(`Max size should be less than ${this.imagMaxSizer}MB`);
 
     const filename: string = `${Date.now()}_${folder}`;
     const base64data: string = Buffer.from(file.buffer).toString('base64');
