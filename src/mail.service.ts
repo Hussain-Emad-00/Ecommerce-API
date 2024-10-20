@@ -56,4 +56,14 @@ export class MailService {
 
     return token;
   }
+
+  async sendMessage(to: string, text: string) {
+    await this.transporter.sendMail({
+      from: 'Ecommerce Service <noreply.ecommerce@gmail.com>',
+      replyTo: 'noreply.ecommerce@gmail.com',
+      to,
+      subject: 'Ecommerce Service',
+      text
+    });
+  }
 }
